@@ -1,0 +1,1 @@
+Bulk upload supported. Paste one code per line in admin panel.

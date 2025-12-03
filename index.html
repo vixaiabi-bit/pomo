@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Buy Promo Code - ₹2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<div class="bg-white shadow-xl p-8 rounded-xl max-w-md w-full">
+  <h2 class="text-2xl font-bold mb-4 text-center">Buy Promo Code – ₹2</h2>
+  <img src="qr.png" class="mx-auto w-48 mb-4" />
+  <input id="txn" placeholder="Enter UPI Transaction ID" class="w-full border p-3 rounded mb-4" />
+  <button onclick="redeem()" class="w-full bg-blue-600 text-white py-3 rounded">Get Promo Code</button>
+  <p id="result" class="mt-4 font-semibold text-center"></p>
+</div>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA-4XRLaGKrLKPwY5rardVa7S6gOGaD4Ds",
+  authDomain: "rizz-eca27.firebaseapp.com",
+  projectId: "rizz-eca27",
+  storageBucket: "rizz-eca27.firebasestorage.app",
+  messagingSenderId: "979930238042",
+  appId: "1:979930238042:web:8cc5fb3060b62f81eb9c63",
+  measurementId: "G-5QCFLE8WSG"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+async function redeem(){
+  let txn=document.getElementById("txn").value.trim();
+  let res=document.getElementById("result");
+  if(!txn){res.innerText="Enter Transaction ID";return;}
+  let used=await db.collection("transactions").doc(txn).get();
+  if(used.exists){res.innerText="This Transaction ID is already used.";return;}
+  let snap=await db.collection("promo_codes").where("used","==",false).limit(1).get();
+  if(snap.empty){res.innerText="All promo codes sold out.";return;}
+  let doc=snap.docs[0]; let code=doc.id;
+  await db.collection("promo_codes").doc(code).update({used:true});
+  await db.collection("transactions").doc(txn).set({promo_code:code,time:Date.now()});
+  res.innerText="Your Promo Code: "+code;
+}
+</script>
+</body>
+</html>
